@@ -53,4 +53,3 @@ print(a_star(capacities1, target_quantity1))  # Output: 14
 print(a_star(capacities2, target_quantity2))  # Output: -1
 print(a_star(capacities3, target_quantity3))  # Output: 12
 print(a_star(capacities4, target_quantity4))  # Output: 50
-edit ed
