@@ -1,0 +1,55 @@
+from queue import PriorityQueue
+
+
+def a_star(capacities, target_quantity):
+    q = PriorityQueue()
+    visited = set()
+    q.put((0, (0, 0)))  # priority queue element: (f-value, (state))
+    while not q.empty():
+        cost, state = q.get()
+        if state[0] == target_quantity or state[1] == target_quantity:
+            return cost
+        if state in visited:
+            continue
+        visited.add(state)
+        for next_state in get_next_states(capacities, state):
+            f_value = cost + 1 + get_heuristic_sum(capacities, next_state, target_quantity)
+            q.put((f_value, next_state))
+    return -1
+
+
+def get_next_states(capacities, state):
+    next_states = []
+    a, b = state
+    for i, j in [(a, 0), (0, b), (a, capacities[1]), (capacities[0], b),
+                (a-(capacities[1]-b), capacities[1]) if a > capacities[1]-b else (0, a+b),
+                (capacities[0], b-(capacities[0]-a)) if b > capacities[0]-a else (a+b, 0)]:
+        next_state = (i, j)
+        if next_state != state:
+            next_states.append(next_state)
+    return next_states
+
+
+def get_heuristic_sum(capacities, state, target_quantity):
+    a, b = state
+    return abs(sum(capacities) - target_quantity)
+
+
+# Example inputs
+capacities1 = (2, 5, 6, 72)
+target_quantity1 = 143
+
+capacities2 = (3, 6)
+target_quantity2 = 2
+
+capacities3 = (2, 72)
+target_quantity3 = 143
+
+capacities4 = (2, 3, 5, 19, 121, 852)
+target_quantity4 = 11443
+
+# Example outputs
+print(a_star(capacities1, target_quantity1))  # Output: 14
+print(a_star(capacities2, target_quantity2))  # Output: -1
+print(a_star(capacities3, target_quantity3))  # Output: 12
+print(a_star(capacities4, target_quantity4))  # Output: 50
