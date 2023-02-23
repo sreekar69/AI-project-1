@@ -85,17 +85,26 @@ class TestJugs(unittest.TestCase):
 
     def test_a_star(self):
         # Test Case 1
-        capacities1 = [5, 3]
-        target_quantity1 = 4
-        self.assertEqual(a_star(capacities1, target_quantity1), 8)
+        with open('input.txt', 'r') as f:
+            capacities = list(map(int, f.readline().strip().split(',')))
+            target_quantity = int(f.readline().strip())
+        self.assertEqual(a_star(capacities, target_quantity), 12)
         # Test Case 2
-        capacities1 = [8,5,3,2]
-        target_quantity1 = 6
-        self.assertEqual(a_star(capacities1, target_quantity1), 6)
+        with open('input1.txt', 'r') as f:
+            capacities = list(map(int, f.readline().strip().split(',')))
+            target_quantity = int(f.readline().strip())
+        self.assertEqual(a_star(capacities, target_quantity), 6)
         # Test Case 3
-        capacities1 = [2, 0]
-        target_quantity1 = 143
-        self.assertEqual(a_star(capacities1, target_quantity1), -1)
+        with open('input2.txt', 'r') as f:
+            capacities = list(map(int, f.readline().strip().split(',')))
+            target_quantity = int(f.readline().strip())
+        self.assertEqual(a_star(capacities, target_quantity), -1)
+        # Test case 4
+        with open('input3.txt', 'r') as f:
+            capacities = list(map(int, f.readline().strip().split(',')))
+            target_quantity = int(f.readline().strip())
+        self.assertEqual(a_star(capacities, target_quantity), -1)
+
 
 
 
