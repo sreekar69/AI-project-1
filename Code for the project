@@ -1,55 +1,105 @@
-from queue import PriorityQueue
+from math import gcd
+
+def get_successors(capacities, state):
+    successors = []
+    a, b = state
+
+    # Pour from jug 1 to jug 2
+    if a != 0 and b != capacities[1]:
+        pour_amount = min(a, capacities[1] - b)
+        successors.append((a - pour_amount, b + pour_amount))
+
+    # Pour from jug 2 to jug 1
+    if b != 0 and a != capacities[0]:
+        pour_amount = min(b, capacities[0] - a)
+        successors.append((a + pour_amount, b - pour_amount))
+
+    # Empty jug 1
+    if a != 0:
+        successors.append((0, b))
+
+    # Empty jug 2
+    if b != 0:
+        successors.append((a, 0))
+
+    # Fill jug 1
+    if a != capacities[0]:
+        successors.append((capacities[0], b))
+
+    # Fill jug 2
+    if b != capacities[1]:
+        successors.append((a, capacities[1]))
+
+    return successors
+
+def get_manhattan_distance(state, target_quantity):
+    a, b = state
+    target_row = target_quantity // b if b != 0 else 0
+    target_col = target_quantity % b if b != 0 else 0
+    return abs(target_row - a) + abs(target_col - (0 if b == 0 else a + b))
 
 
 def a_star(capacities, target_quantity):
-    q = PriorityQueue()
-    visited = set()
-    q.put((0, (0, 0)))  # priority queue element: (f-value, (state))
-    while not q.empty():
-        cost, state = q.get()
-        if state[0] == target_quantity or state[1] == target_quantity:
-            return cost
-        if state in visited:
-            continue
-        visited.add(state)
-        for next_state in get_next_states(capacities, state):
-            f_value = cost + 1 + get_heuristic_sum(capacities, next_state, target_quantity)
-            q.put((f_value, next_state))
+    start_state = (0, 0)
+    frontier = [(0, start_state)]
+    explored = set()
+    g_scores = {start_state: 0}
+    f_scores = {start_state: get_manhattan_distance(start_state, target_quantity)}
+
+    while frontier:
+        _, current_state = min(frontier)
+        if current_state[0] == target_quantity:
+            return g_scores[current_state]
+
+        frontier.remove((f_scores[current_state], current_state))
+        explored.add(current_state)
+
+        for next_state in get_successors(capacities, current_state):
+            if next_state in explored:
+                continue
+
+            tentative_g_score = g_scores[current_state] + 1
+            if next_state not in [s for _, s in frontier]:
+                frontier.append((tentative_g_score + get_manhattan_distance(next_state, target_quantity), next_state))
+            elif tentative_g_score >= g_scores[next_state]:
+                continue
+
+            g_scores[next_state] = tentative_g_score
+            f_scores[next_state] = tentative_g_score + get_manhattan_distance(next_state, target_quantity)
+
     return -1
 
-
-def get_next_states(capacities, state):
-    next_states = []
-    a, b = state
-    for i, j in [(a, 0), (0, b), (a, capacities[1]), (capacities[0], b),
-                (a-(capacities[1]-b), capacities[1]) if a > capacities[1]-b else (0, a+b),
-                (capacities[0], b-(capacities[0]-a)) if b > capacities[0]-a else (a+b, 0)]:
-        next_state = (i, j)
-        if next_state != state:
-            next_states.append(next_state)
-    return next_states
+# Example cases
+with open('input.txt', 'r') as f:
+    capacities = list(map(int, f.readline().strip().split(',')))
+    target_quantity = int(f.readline().strip())
+print(a_star(capacities, target_quantity))
 
 
-def get_heuristic_sum(capacities, state, target_quantity):
-    a, b = state
-    return abs(sum(capacities) - target_quantity)
+
+import unittest
 
 
-# Example inputs
-capacities1 = (2, 5, 6, 72)
-target_quantity1 = 143
 
-capacities2 = (3, 6)
-target_quantity2 = 2
+class TestJugs(unittest.TestCase):
 
-capacities3 = (2, 72)
-target_quantity3 = 143
+    def test_a_star(self):
+        # Test Case 1
+        capacities1 = [5, 3]
+        target_quantity1 = 4
+        self.assertEqual(a_star(capacities1, target_quantity1), 8)
+        # Test Case 2
+        capacities1 = [8,5,3,2]
+        target_quantity1 = 6
+        self.assertEqual(a_star(capacities1, target_quantity1), 6)
+        # Test Case 3
+        capacities1 = [2, 0]
+        target_quantity1 = 143
+        self.assertEqual(a_star(capacities1, target_quantity1), -1)
 
-capacities4 = (2, 3, 5, 19, 121, 852)
-target_quantity4 = 11443
 
-# Example outputs
-print(a_star(capacities1, target_quantity1))  # Output: 14
-print(a_star(capacities2, target_quantity2))  # Output: -1
-print(a_star(capacities3, target_quantity3))  # Output: 12
-print(a_star(capacities4, target_quantity4))  # Output: 50
+
+
+
+if __name__ == '__main__':
+    unittest.main()
